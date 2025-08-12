@@ -20,7 +20,7 @@ RUN pip install poetry
 RUN poetry config virtualenvs.create false
 
 # Install dependencies
-RUN poetry install --only=main --no-dev
+RUN poetry install --only=main
 
 # Create non-root user for security
 RUN useradd -m -u 1000 mcpuser && chown -R mcpuser:mcpuser /app
