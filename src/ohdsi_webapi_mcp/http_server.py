@@ -170,7 +170,7 @@ mcp.mount()
 async def search_concepts_endpoint(request: ConceptSearchRequest, config=Depends(get_webapi_config)):
     """Search for medical concepts in OMOP vocabularies."""
     try:
-        result = await search_concepts(**request.dict())
+        result = await search_concepts(**request.model_dump())
         return {"status": "success", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
