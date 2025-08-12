@@ -29,7 +29,6 @@ This module provides a FastAPI HTTP server that exposes OHDSI WebAPI functionali
 as both REST endpoints and MCP tools via fastapi-mcp integration.
 """
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
