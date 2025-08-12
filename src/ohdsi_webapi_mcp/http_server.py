@@ -161,7 +161,7 @@ app = FastAPI(
 # Add MCP integration
 mcp = FastApiMCP(app)
 
-# Mount the MCP server at /mcp endpoint
+# Mount the MCP server at the default endpoint (usually /mcp)
 mcp.mount()
 
 
