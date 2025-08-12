@@ -26,5 +26,8 @@ RUN poetry install --only=main
 RUN useradd -m -u 1000 mcpuser && chown -R mcpuser:mcpuser /app
 USER mcpuser
 
-# Set entrypoint
+# Expose HTTP port for HTTP mode
+EXPOSE 8000
+
+# Default to stdio mode for backward compatibility, but allow override
 ENTRYPOINT ["ohdsi-webapi-mcp"]
