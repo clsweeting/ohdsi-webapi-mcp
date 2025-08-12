@@ -180,7 +180,7 @@ async def search_concepts_endpoint(request: ConceptSearchRequest, config=Depends
 async def get_concept_details_endpoint(request: ConceptDetailsRequest, config=Depends(get_webapi_config)):
     """Get detailed information about a specific concept."""
     try:
-        result = await get_concept_details(**request.dict())
+        result = await get_concept_details(**request.model_dump())
         return {"status": "success", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
