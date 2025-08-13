@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from ohdsi_webapi_mcp.tools.concepts import search_concepts
+from ohdsi_webapi_mcp.tools.vocabulary import search_concepts
 
 
 class TestConceptSearch:
@@ -36,17 +36,17 @@ class TestConceptSearch:
         mock_concepts = [mock_concept1, mock_concept2]
 
         # Mock the WebAPI client
-        with patch("ohdsi_webapi_mcp.tools.concepts.WebApiClient") as mock_client_class:
+        with patch("ohdsi_webapi_mcp.tools.vocabulary.WebApiClient") as mock_client_class:
             mock_client = Mock()
             mock_client_class.return_value = mock_client
-            mock_client.vocab.search.return_value = mock_concepts
+            mock_client.vocabulary.search.return_value = mock_concepts
 
             # Call the function
             results = await search_concepts("diabetes", domain="Condition", limit=10)
 
             # Verify WebAPI client was called correctly
             mock_client_class.assert_called_once_with("https://test.example.com/WebAPI")
-            mock_client.vocab.search.assert_called_once_with(
+            mock_client.vocabulary.search.assert_called_once_with(
                 query="diabetes", page_size=10, domain_id="Condition", standard_concept="S", invalid_reason=""
             )
             mock_client.close.assert_called_once()
@@ -63,10 +63,10 @@ class TestConceptSearch:
         """Test search_concepts when no concepts are found."""
         monkeypatch.setenv("WEBAPI_BASE_URL", "https://test.example.com/WebAPI")
 
-        with patch("ohdsi_webapi_mcp.tools.concepts.WebApiClient") as mock_client_class:
+        with patch("ohdsi_webapi_mcp.tools.vocabulary.WebApiClient") as mock_client_class:
             mock_client = Mock()
             mock_client_class.return_value = mock_client
-            mock_client.vocab.search.return_value = []
+            mock_client.vocabulary.search.return_value = []
 
             results = await search_concepts("nonexistent", limit=10)
 
@@ -94,14 +94,14 @@ class TestConceptSearch:
         mock_concept.concept_code = "6809"
         mock_concept.standard_concept = "S"
 
-        with patch("ohdsi_webapi_mcp.tools.concepts.WebApiClient") as mock_client_class:
+        with patch("ohdsi_webapi_mcp.tools.vocabulary.WebApiClient") as mock_client_class:
             mock_client = Mock()
             mock_client_class.return_value = mock_client
-            mock_client.vocab.search.return_value = [mock_concept]
+            mock_client.vocabulary.search.return_value = [mock_concept]
 
             results = await search_concepts(query="metformin", domain="Drug", vocabulary="RxNorm", limit=5)
 
-            mock_client.vocab.search.assert_called_once_with(
+            mock_client.vocabulary.search.assert_called_once_with(
                 query="metformin", page_size=5, domain_id="Drug", vocabulary_id="RxNorm", standard_concept="S", invalid_reason=""
             )
 

@@ -15,16 +15,16 @@ import mcp.types as types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 
-from .tools.cohorts import add_inclusion_rule, create_concept_set, define_primary_criteria, estimate_cohort_size, validate_cohort_definition
-from .tools.concepts import (
+from .tools.cohorts import add_inclusion_rule, define_primary_criteria, estimate_cohort_size, validate_cohort_definition
+from .tools.concept_sets import create_concept_set, create_concept_set_from_search
+from .tools.persistence import clone_cohort, compare_cohorts, list_cohorts, load_existing_cohort, save_cohort_definition
+from .tools.vocabulary import (
     browse_concept_hierarchy,
-    create_concept_set_from_search,
     get_concept_details,
     list_domains,
     list_vocabularies,
     search_concepts,
 )
-from .tools.persistence import clone_cohort, compare_cohorts, list_cohorts, load_existing_cohort, save_cohort_definition
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

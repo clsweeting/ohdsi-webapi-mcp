@@ -22,6 +22,10 @@ RUN poetry config virtualenvs.create false
 # Install dependencies
 RUN poetry install --only=main
 
+# Use a flexible entrypoint that can run either mode
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Create non-root user for security
 RUN useradd -m -u 1000 mcpuser && chown -R mcpuser:mcpuser /app
 USER mcpuser
@@ -30,4 +34,5 @@ USER mcpuser
 EXPOSE 8000
 
 # Default to stdio mode for backward compatibility, but allow override
-ENTRYPOINT ["ohdsi-webapi-mcp"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["stdio"]
