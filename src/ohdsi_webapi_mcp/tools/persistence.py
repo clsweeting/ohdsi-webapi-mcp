@@ -42,14 +42,13 @@ async def save_cohort_definition(name: str, cohort_definition: dict[str, Any], d
             }
 
             # Save to WebAPI
-            saved_cohort = client.cohort_definitions.create(cohort_data)
+            saved_cohort = client.cohorts.create(cohort_data)
 
             result = f"""✅ Cohort Definition Saved Successfully!
 
 Cohort ID: {saved_cohort.id}
 Name: {saved_cohort.name}
 Description: {saved_cohort.description}
-Created: {saved_cohort.created_date}
 
 WebAPI URL: {webapi_base_url}/cohortdefinition/{saved_cohort.id}
 
@@ -110,10 +109,10 @@ async def load_existing_cohort(cohort_id: int | None = None, cohort_name: str | 
 
         if cohort_id:
             # Load by ID
-            cohort = await client.cohort_definitions.get(cohort_id)
+            cohort = await client.cohorts.get(cohort_id)
         else:
             # Search by name
-            cohorts = await client.cohort_definitions.list()
+            cohorts = await client.cohorts.list()
             matching_cohorts = [c for c in cohorts if c.name.lower() == cohort_name.lower()]
 
             if not matching_cohorts:
@@ -135,15 +134,13 @@ async def load_existing_cohort(cohort_id: int | None = None, cohort_name: str | 
             return [types.TextContent(type="text", text=f"Cohort not found: {cohort_id or cohort_name}")]
 
         # Get full definition
-        full_definition = await client.cohort_definitions.get_definition(cohort.id)
+        full_definition = await client.cohorts.get_definition(cohort.id)
 
         result = f"""Loaded Cohort Definition:
 
 ID: {cohort.id}
 Name: {cohort.name}
 Description: {cohort.description or 'No description'}
-Created: {cohort.created_date}
-Modified: {cohort.modified_date}
 
 WebAPI URL: {webapi_base_url}/cohortdefinition/{cohort.id}
 
@@ -336,12 +333,12 @@ async def clone_cohort(
 
     try:
         # Load source cohort
-        source_cohort = await client.cohort_definitions.get(source_cohort_id)
+        source_cohort = await client.cohorts.get(source_cohort_id)
         if not source_cohort:
             return [types.TextContent(type="text", text=f"Source cohort not found: {source_cohort_id}")]
 
         # Get full definition
-        source_definition = await client.cohort_definitions.get_definition(source_cohort_id)
+        source_definition = await client.cohorts.get_definition(source_cohort_id)
         if not source_definition:
             return [types.TextContent(type="text", text=f"Could not load definition for cohort {source_cohort_id}")]
 
@@ -362,7 +359,7 @@ async def clone_cohort(
             "expression": cloned_definition,
         }
 
-        cloned_cohort = await client.cohort_definitions.create(cohort_data)
+        cloned_cohort = await client.cohorts.create(cohort_data)
 
         result = f"""✅ Cohort Cloned Successfully!
 
@@ -426,7 +423,7 @@ async def list_cohorts(limit: int = 20, search_term: str | None = None) -> list[
         client = WebApiClient(webapi_base_url)
         try:
             # Get all cohorts
-            cohorts = client.cohort_definitions.list()
+            cohorts = client.cohorts.list()
 
             # Filter by search term if provided
             if search_term:
@@ -452,7 +449,7 @@ async def list_cohorts(limit: int = 20, search_term: str | None = None) -> list[
                     # Truncate long descriptions
                     desc = cohort.description[:100] + "..." if len(cohort.description) > 100 else cohort.description
                     result += f"  Description: {desc}\n"
-                result += f"  Created: {cohort.created_date}\n"
+                # Remove created_date as it doesn't exist on the cohort object
                 result += f"  URL: {webapi_base_url}/cohortdefinition/{cohort.id}\n\n"
 
             if len(cohorts) == limit:
