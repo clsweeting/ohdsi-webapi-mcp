@@ -178,7 +178,7 @@ Definition Summary:
     except Exception as e:
         return [types.TextContent(type="text", text=f"Error loading cohort: {str(e)}")]
     finally:
-        await client.close()
+        client.close()
 
 
 async def compare_cohorts(
@@ -397,7 +397,7 @@ The cloned cohort is now available for generation and analysis.
     except Exception as e:
         return [types.TextContent(type="text", text=f"Error cloning cohort: {str(e)}")]
     finally:
-        await client.close()
+        client.close()
 
 
 async def list_cohorts(limit: int = 20, search_term: str | None = None) -> list[types.TextContent]:

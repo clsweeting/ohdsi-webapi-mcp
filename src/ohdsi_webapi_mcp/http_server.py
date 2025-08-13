@@ -1,88 +1,68 @@
-"""HTTP server implementation for OHDSI WebAPI MCP server.
+"""
+FastAPI HTTP server for OHDSI WebAPI MCP tools.
 
-This module provides a FastAPI HTTP server that exposes OHDSI WebAPI functionality
-as both REST endpoints and MCP tools via fastapi-mcp integration.
+This module creates an HTTP API server that exposes the MCP tools as REST endpoints,
+making them accessible via HTTP requests in addition to the MCP protocol.
 """
 
-import logging
-import os
-
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_mcp import FastApiMCP
 
-from .routes import (
-    cohorts_router,
-    concept_sets_router,
-    info_router,
-    jobs_router,
-    persistence_router,
-    sources_router,
-    vocabulary_router,
-)
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-def get_webapi_config():
-    """Get WebAPI configuration from environment variables."""
-    webapi_base_url = os.getenv("WEBAPI_BASE_URL")
-    if not webapi_base_url:
-        raise HTTPException(status_code=500, detail="WEBAPI_BASE_URL environment variable is required")
-
-    return {
-        "webapi_base_url": webapi_base_url,
-        "webapi_source_key": os.getenv("WEBAPI_SOURCE_KEY"),
-    }
-
-
-# Create FastAPI app
-app = FastAPI(
-    title="OHDSI WebAPI MCP Server",
-    description="HTTP server providing OHDSI WebAPI functionality as both REST endpoints and MCP tools",
-    version="0.1.0",
-)
-
-# Add MCP integration
-mcp = FastApiMCP(app)
-
-# Mount the MCP server at the default endpoint (usually /mcp)
-mcp.mount()
-
-# Include routers from the routes package
-app.include_router(vocabulary_router)
-app.include_router(concept_sets_router)
-app.include_router(info_router)
-app.include_router(jobs_router)
-app.include_router(sources_router)
-app.include_router(cohorts_router)
-app.include_router(persistence_router)
-
-
-# Health check endpoint
-@app.get("/health")
-async def health_check():
-    """Health check endpoint."""
-    return {"status": "healthy", "service": "ohdsi-webapi-mcp"}
+from .routes.cohorts import router as cohorts_router
+from .routes.concept_sets import router as concept_sets_router
+from .routes.info import router as info_router
+from .routes.jobs import router as jobs_router
+from .routes.persistence import router as persistence_router
+from .routes.sources import router as sources_router
+from .routes.vocabulary import router as vocabulary_router
 
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
+
+    # Create FastAPI app
+    app = FastAPI(
+        title="OHDSI WebAPI MCP Server",
+        description="HTTP API for OHDSI WebAPI Model Context Protocol tools",
+        version="0.1.0",
+    )
+
+    # Add CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Configure appropriately for production
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Initialize MCP integration
+    _mcp = FastApiMCP(app)  # Keep reference to prevent garbage collection
+
+    # Include routers
+    app.include_router(vocabulary_router)
+    app.include_router(concept_sets_router)
+    app.include_router(cohorts_router)
+    app.include_router(info_router)
+    app.include_router(jobs_router)
+    app.include_router(sources_router)
+    app.include_router(persistence_router)
+
+    # Health check endpoint
+    @app.get("/health")
+    async def health_check():
+        """Health check endpoint."""
+        return {"status": "healthy", "service": "ohdsi-webapi-mcp"}
+
     return app
 
 
-def main():
-    """Main entry point for the HTTP server."""
-    import uvicorn
-
-    port = int(os.getenv("MCP_PORT", "8000"))
-    host = os.getenv("MCP_HOST", "0.0.0.0")
-
-    logger.info(f"Starting OHDSI WebAPI MCP HTTP server on {host}:{port}")
-    logger.info(f"MCP endpoint will be available at http://{host}:{port}/mcp")
-    uvicorn.run(app, host=host, port=port)
+# Create app instance
+app = create_app()
 
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
