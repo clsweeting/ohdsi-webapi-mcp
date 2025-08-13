@@ -144,7 +144,7 @@ class TestMCPServerOutputFormat:
         # We can test this by checking the return type annotations
         import inspect
 
-        from ohdsi_webapi_mcp.tools.concepts import get_concept_details, search_concepts
+        from ohdsi_webapi_mcp.tools.vocabulary import get_concept_details, search_concepts
 
         for tool_func in [search_concepts, get_concept_details]:
             sig = inspect.signature(tool_func)

@@ -19,7 +19,8 @@ help:
 	@echo "  clean            Clean build artifacts"
 	@echo "  build            Build package"
 	@echo "  publish          Publish to PyPI"
-	@echo "  run              Start MCP server"
+	@echo "  run              Start HTTP MCP server (default)"
+	@echo "  run-stdio        Start stdio MCP server"
 	@echo "  docker-build     Build Docker image"
 	@echo "  docker-run       Run MCP server in Docker"
 	@echo "  docker-test      Test Docker image"
@@ -76,9 +77,14 @@ check-all: lint format-check type-check test
 
 # MCP Server
 run:
-	@echo "Starting MCP server with Atlas demo..."
-	@echo "Set WEBAPI_BASE_URL if you want to use a different WebAPI instance"
-	WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI poetry run python -m ohdsi_webapi_mcp.server
+	@echo "Starting HTTP MCP server..."
+	@echo "Configure settings in .env file or set environment variables"
+	poetry run python -m ohdsi_webapi_mcp.http_server
+
+run-stdio:
+	@echo "Starting stdio MCP server..."
+	@echo "Configure settings in .env file or set environment variables"
+	poetry run python -m ohdsi_webapi_mcp.server
 
 # Build and publish
 clean:
@@ -113,12 +119,6 @@ pre-commit-install:
 
 pre-commit-run:
 	poetry run pre-commit run --all-files
-
-# Environment setup
-setup-env:
-	@echo "Creating .env file from template..."
-	@if [ ! -f .env ]; then cp .env.example .env; echo ".env created from .env.example"; else echo ".env already exists"; fi
-	@echo "Edit .env to configure your WebAPI settings"
 
 # Docker commands
 docker-build:

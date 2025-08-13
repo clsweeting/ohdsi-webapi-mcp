@@ -1,5 +1,6 @@
 """Tools for persistence and data management."""
 
+import asyncio
 import json
 import os
 from typing import Any
@@ -29,26 +30,25 @@ async def save_cohort_definition(name: str, cohort_definition: dict[str, Any], d
     if not webapi_base_url:
         raise ValueError("WEBAPI_BASE_URL environment variable is required")
 
-    client = WebApiClient(webapi_base_url)
+    def _sync_save_cohort():
+        client = WebApiClient(webapi_base_url)
+        try:
+            # Prepare cohort definition for saving
+            cohort_data = {
+                "name": name,
+                "description": description or f"Cohort created via MCP: {name}",
+                "expressionType": "SIMPLE_EXPRESSION",
+                "expression": cohort_definition,
+            }
 
-    try:
-        # Prepare cohort definition for saving
-        cohort_data = {
-            "name": name,
-            "description": description or f"Cohort created via MCP: {name}",
-            "expressionType": "SIMPLE_EXPRESSION",
-            "expression": cohort_definition,
-        }
+            # Save to WebAPI
+            saved_cohort = client.cohorts.create(cohort_data)
 
-        # Save to WebAPI
-        saved_cohort = await client.cohort_definitions.create(cohort_data)
-
-        result = f"""✅ Cohort Definition Saved Successfully!
+            result = f"""✅ Cohort Definition Saved Successfully!
 
 Cohort ID: {saved_cohort.id}
 Name: {saved_cohort.name}
 Description: {saved_cohort.description}
-Created: {saved_cohort.created_date}
 
 WebAPI URL: {webapi_base_url}/cohortdefinition/{saved_cohort.id}
 
@@ -63,12 +63,16 @@ Cohort Definition Summary:
 - Primary Criteria: {'Defined' if cohort_definition.get('PrimaryCriteria') else 'Missing'}
 """
 
-        return [types.TextContent(type="text", text=result)]
+            return [types.TextContent(type="text", text=result)]
 
-    except Exception as e:
-        return [types.TextContent(type="text", text=f"Error saving cohort definition: {str(e)}")]
-    finally:
-        await client.close()
+        except Exception as e:
+            return [types.TextContent(type="text", text=f"Error saving cohort definition: {str(e)}")]
+        finally:
+            if hasattr(client, "close") and callable(client.close):
+                client.close()
+
+    # Run the sync function in a thread pool
+    return await asyncio.to_thread(_sync_save_cohort)
 
 
 async def load_existing_cohort(cohort_id: int | None = None, cohort_name: str | None = None) -> list[types.TextContent]:
@@ -105,10 +109,10 @@ async def load_existing_cohort(cohort_id: int | None = None, cohort_name: str | 
 
         if cohort_id:
             # Load by ID
-            cohort = await client.cohort_definitions.get(cohort_id)
+            cohort = await client.cohorts.get(cohort_id)
         else:
             # Search by name
-            cohorts = await client.cohort_definitions.list()
+            cohorts = await client.cohorts.list()
             matching_cohorts = [c for c in cohorts if c.name.lower() == cohort_name.lower()]
 
             if not matching_cohorts:
@@ -130,15 +134,13 @@ async def load_existing_cohort(cohort_id: int | None = None, cohort_name: str | 
             return [types.TextContent(type="text", text=f"Cohort not found: {cohort_id or cohort_name}")]
 
         # Get full definition
-        full_definition = await client.cohort_definitions.get_definition(cohort.id)
+        full_definition = await client.cohorts.get_definition(cohort.id)
 
         result = f"""Loaded Cohort Definition:
 
 ID: {cohort.id}
 Name: {cohort.name}
 Description: {cohort.description or 'No description'}
-Created: {cohort.created_date}
-Modified: {cohort.modified_date}
 
 WebAPI URL: {webapi_base_url}/cohortdefinition/{cohort.id}
 
@@ -331,12 +333,12 @@ async def clone_cohort(
 
     try:
         # Load source cohort
-        source_cohort = await client.cohort_definitions.get(source_cohort_id)
+        source_cohort = await client.cohorts.get(source_cohort_id)
         if not source_cohort:
             return [types.TextContent(type="text", text=f"Source cohort not found: {source_cohort_id}")]
 
         # Get full definition
-        source_definition = await client.cohort_definitions.get_definition(source_cohort_id)
+        source_definition = await client.cohorts.get_definition(source_cohort_id)
         if not source_definition:
             return [types.TextContent(type="text", text=f"Could not load definition for cohort {source_cohort_id}")]
 
@@ -357,7 +359,7 @@ async def clone_cohort(
             "expression": cloned_definition,
         }
 
-        cloned_cohort = await client.cohort_definitions.create(cohort_data)
+        cloned_cohort = await client.cohorts.create(cohort_data)
 
         result = f"""✅ Cohort Cloned Successfully!
 
@@ -417,49 +419,53 @@ async def list_cohorts(limit: int = 20, search_term: str | None = None) -> list[
     if not webapi_base_url:
         raise ValueError("WEBAPI_BASE_URL environment variable is required")
 
-    client = WebApiClient(webapi_base_url)
+    def _sync_list_cohorts():
+        client = WebApiClient(webapi_base_url)
+        try:
+            # Get all cohorts
+            cohorts = client.cohorts.list()
 
-    try:
-        # Get all cohorts
-        cohorts = await client.cohort_definitions.list()
-
-        # Filter by search term if provided
-        if search_term:
-            cohorts = [c for c in cohorts if search_term.lower() in c.name.lower()]
-
-        # Limit results
-        cohorts = cohorts[:limit]
-
-        if not cohorts:
-            message = "No cohorts found"
+            # Filter by search term if provided
             if search_term:
-                message += f" matching '{search_term}'"
-            return [types.TextContent(type="text", text=message)]
+                cohorts = [c for c in cohorts if search_term.lower() in c.name.lower()]
 
-        result = "Available Cohort Definitions"
-        if search_term:
-            result += f" (matching '{search_term}')"
-        result += ":\n\n"
+            # Limit results
+            cohorts = cohorts[:limit]
 
-        for cohort in cohorts:
-            result += f"ID {cohort.id}: {cohort.name}\n"
-            if cohort.description:
-                # Truncate long descriptions
-                desc = cohort.description[:100] + "..." if len(cohort.description) > 100 else cohort.description
-                result += f"  Description: {desc}\n"
-            result += f"  Created: {cohort.created_date}\n"
-            result += f"  URL: {webapi_base_url}/cohortdefinition/{cohort.id}\n\n"
+            if not cohorts:
+                message = "No cohorts found"
+                if search_term:
+                    message += f" matching '{search_term}'"
+                return [types.TextContent(type="text", text=message)]
 
-        if len(cohorts) == limit:
-            result += f"(Showing first {limit} results)\n"
+            result = "Available Cohort Definitions"
+            if search_term:
+                result += f" (matching '{search_term}')"
+            result += ":\n\n"
 
-        result += f"\nTotal: {len(cohorts)} cohorts"
-        if search_term:
-            result += f" matching '{search_term}'"
+            for cohort in cohorts:
+                result += f"ID {cohort.id}: {cohort.name}\n"
+                if cohort.description:
+                    # Truncate long descriptions
+                    desc = cohort.description[:100] + "..." if len(cohort.description) > 100 else cohort.description
+                    result += f"  Description: {desc}\n"
+                # Remove created_date as it doesn't exist on the cohort object
+                result += f"  URL: {webapi_base_url}/cohortdefinition/{cohort.id}\n\n"
 
-        return [types.TextContent(type="text", text=result)]
+            if len(cohorts) == limit:
+                result += f"(Showing first {limit} results)\n"
 
-    except Exception as e:
-        return [types.TextContent(type="text", text=f"Error listing cohorts: {str(e)}")]
-    finally:
-        await client.close()
+            result += f"\nTotal: {len(cohorts)} cohorts"
+            if search_term:
+                result += f" matching '{search_term}'"
+
+            return [types.TextContent(type="text", text=result)]
+
+        except Exception as e:
+            return [types.TextContent(type="text", text=f"Error listing cohorts: {str(e)}")]
+        finally:
+            if hasattr(client, "close") and callable(client.close):
+                client.close()
+
+    # Run the sync function in a thread pool
+    return await asyncio.to_thread(_sync_list_cohorts)

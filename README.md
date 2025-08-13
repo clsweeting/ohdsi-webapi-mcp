@@ -5,12 +5,24 @@
 
 A Model Context Protocol (MCP) server that provides LLM agents with tools to interact with OHDSI WebAPI for cohort building and analysis.
 
+## Transport Modes
+
+This server supports **two transport modes** to fit different use cases:
+
+### 📟 **stdio Mode** (Traditional)
+- **Best for**: Local MCP clients, command-line usage
+- **Transport**: stdin/stdout communication
+- **Command**: `ohdsi-webapi-mcp`
+- **Use case**: Claude Desktop, VS Code MCP extension
+
+### 🌐 **HTTP Mode** (Modern)
+- **Best for**: Web integration, remote access, testing
+- **Transport**: HTTP with Server-Sent Events (SSE)
+- **Command**: `ohdsi-webapi-mcp-http`
+- **Use case**: Web applications, remote MCP clients, API testing
+- **Bonus**: Includes Swagger UI at `/docs` for API exploration
+
 ## Supported Functionality
-
-- **Concept Search**: Find medical concepts across OMOP vocabularies
-- **Cohort Building**: Create and validate cohort definitions programmatically  
-
-Available Tools: 
 
 ### Concept Discovery
 - `search_concepts` - Search for medical concepts by name or code
@@ -30,100 +42,103 @@ Available Tools:
 - `compare_cohorts` - Analyze differences between cohort definitions
 
 
-## Installation
+## Quick Start
 
-### Recommended: Using pipx (isolated installation)
+Choose your preferred transport mode:
+
+### 📟 **stdio Mode** (Traditional MCP)
+Perfect for Claude Desktop, VS Code, and local MCP clients.
+
 ```bash
-# Install pipx if you don't have it (like npx for Python)
-pip install pipx
-
-# Install ohdsi-webapi-mcp in an isolated environment
+# Install
 pipx install ohdsi-webapi-mcp
 
-# The command is available globally but dependencies are isolated
+# Configure Claude Desktop (see docs/stdio-setup.md for details)
+# Start with just the WebAPI URL - no source key needed initially!
+# Then ask Claude: "Search for diabetes concepts in OMOP"
 ```
-**Why pipx?** Like `npx` for Node.js, `pipx` installs CLI tools in isolated environments so they don't conflict with your other Python packages, but the commands are still available globally.
 
-### Alternative: Global installation
+**→ [Complete stdio Setup Guide](docs/stdio-setup.md)**
+
+### 🌐 **HTTP Mode** (Modern Web API)
+Great for web apps, testing, and remote access with Swagger UI.
+
+```bash
+# Install & run
+pipx install ohdsi-webapi-mcp
+WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI ohdsi-webapi-mcp-http
+
+# Test the API (no source key needed for concept searches!)
+curl http://localhost:8000/health
+open http://localhost:8000/docs  # Interactive API docs
+```
+
+**→ [Complete HTTP Setup Guide](docs/http-setup.md)**
+
+## Installation
+
+Both modes use the same installation - choose your method:
+
+### Recommended: pipx
+```bash
+pip install pipx
+pipx install ohdsi-webapi-mcp
+```
+
+### Alternative: pip
 ```bash
 pip install ohdsi-webapi-mcp
 ```
 
-### Docker (no Python installation required)
+### Alternative: Docker
 ```bash
-# Quick start - pull and run the pre-built image
+# stdio mode (start with concept searches - no source key needed!)
 docker run -i --rm \
   -e WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI" \
-  ghcr.io/clsweeting/ohdsi-webapi-mcp:latest
+  ghcr.io/clsweeting/ohdsi-webapi-mcp:latest stdio
+
+# HTTP mode (same - source key optional)
+docker run -p 8000:8000 --rm \
+  -e WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI" \
+  ghcr.io/clsweeting/ohdsi-webapi-mcp:latest http
 ```
 
-> 📖 **For detailed Docker usage, development workflows, and troubleshooting**, see [docs/docker.md](docs/docker.md)
 
-### Development installation
+
+
+## Environment Variables
+
+Both modes support the same environment variables:
+
+- **`WEBAPI_BASE_URL`** (required): Base URL of your OHDSI WebAPI instance
+- **`WEBAPI_SOURCE_KEY`** (optional): CDM source key - only needed for cohort operations, not concept searches
+- **`MCP_PORT`** (HTTP mode only): Port for HTTP server (default: 8000)
+- **`MCP_HOST`** (HTTP mode only): Host for HTTP server (default: 0.0.0.0)
+- **`LOG_LEVEL`** (optional): Logging level (default: INFO)
+
+💡 **New to OHDSI?** Start with just `WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI` - most features work without a source key!
+
+## Documentation
+
+- **[stdio Mode Setup](docs/stdio-setup.md)** - Complete guide for Claude Desktop, VS Code, and traditional MCP clients
+- **[HTTP Mode Setup](docs/http-setup.md)** - Complete guide for web integration, API access, and modern MCP clients
+
+## Development
+
+For development setup, testing, and contributing:
+
 ```bash
 git clone https://github.com/clsweeting/ohdsi-webapi-mcp.git
 cd ohdsi-webapi-mcp
-pip install -e .
-```
+pip install -e ".[dev]"
 
+# Run tests
+make test
 
-
-
-## MCP Client Configuration
-
-### Claude Desktop
-
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "ohdsi-webapi": {
-      "command": "ohdsi-webapi-mcp",
-      "env": {
-        "WEBAPI_BASE_URL": "https://your-webapi-instance.org/WebAPI"
-      }
-    }
-  }
-}
-```
-
-**Optional:** Add a default source key for cohort operations:
-```json
-{
-  "mcpServers": {
-    "ohdsi-webapi": {
-      "command": "ohdsi-webapi-mcp",
-      "env": {
-        "WEBAPI_BASE_URL": "https://your-webapi-instance.org/WebAPI",
-      }
-    }
-  }
-}
-```
-
-### VS Code with MCP Extension
-
-Configure in your VS Code settings:
-
-```json
-{
-  "mcp.servers": [
-    {
-      "name": "ohdsi-webapi",
-      "command": ["ohdsi-webapi-mcp"],
-      "env": {
-        "WEBAPI_BASE_URL": "https://your-webapi-instance.org/WebAPI"
-      }
-    }
-  ]
-}
-```
-
-
-## Developing & Contributing
-
-Please see [docs/development.md](docs/development.md) for more information. 
+# Available commands:
+# ohdsi-webapi-mcp          (stdio mode)
+# ohdsi-webapi-mcp-http     (HTTP mode)
+``` 
 
 ## License
 

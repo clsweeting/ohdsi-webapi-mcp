@@ -46,12 +46,12 @@ class TestMCPTools:
         """Test concept search tool."""
         monkeypatch.setenv("WEBAPI_BASE_URL", "https://test.example.com/WebAPI")
 
-        from ohdsi_webapi_mcp.tools.concepts import search_concepts
+        from ohdsi_webapi_mcp.tools.vocabulary import search_concepts
 
-        with patch("ohdsi_webapi_mcp.tools.concepts.WebApiClient") as mock_client_class:
+        with patch("ohdsi_webapi_mcp.tools.vocabulary.WebApiClient") as mock_client_class:
             mock_client = Mock()
             mock_client_class.return_value = mock_client
-            mock_client.vocab.search.return_value = []
+            mock_client.vocabulary.search.return_value = []
 
             result = await search_concepts("diabetes", domain="Condition", limit=10)
 
@@ -64,9 +64,9 @@ class TestMCPTools:
         """Test concept details tool."""
         monkeypatch.setenv("WEBAPI_BASE_URL", "https://test.example.com/WebAPI")
 
-        from ohdsi_webapi_mcp.tools.concepts import get_concept_details
+        from ohdsi_webapi_mcp.tools.vocabulary import get_concept_details
 
-        with patch("ohdsi_webapi_mcp.tools.concepts.WebApiClient") as mock_client_class:
+        with patch("ohdsi_webapi_mcp.tools.vocabulary.WebApiClient") as mock_client_class:
             mock_client = Mock()
             mock_client_class.return_value = mock_client
             mock_concept = Mock()
@@ -78,8 +78,8 @@ class TestMCPTools:
             mock_concept.concept_code = "44054006"
             mock_concept.standard_concept = "S"
             mock_concept.invalid_reason = None
-            mock_client.vocab.get_concept.return_value = mock_concept
-            mock_client.vocab.get_concept_relationships.return_value = []
+            mock_client.vocabulary.get_concept.return_value = mock_concept
+            mock_client.vocabulary.get_concept_relationships.return_value = []
             mock_client.close = AsyncMock()  # Mock async close method
 
             result = await get_concept_details(201826)
@@ -92,9 +92,9 @@ class TestMCPTools:
         """Test concept set creation tool."""
         monkeypatch.setenv("WEBAPI_BASE_URL", "https://test.example.com/WebAPI")
 
-        from ohdsi_webapi_mcp.tools.cohorts import create_concept_set
+        from ohdsi_webapi_mcp.tools.concept_sets import create_concept_set
 
-        with patch("ohdsi_webapi_mcp.tools.cohorts.WebApiClient") as mock_client_class:
+        with patch("ohdsi_webapi_mcp.tools.concept_sets.WebApiClient") as mock_client_class:
             mock_client = Mock()
             mock_client_class.return_value = mock_client
 
@@ -127,7 +127,7 @@ class TestMCPTools:
                     return mock_concept2
                 return None
 
-            mock_client.vocab.get_concept.side_effect = mock_get_concept
+            mock_client.vocabulary.get_concept.side_effect = mock_get_concept
             mock_client.close = AsyncMock()  # Mock async close method
 
             result = await create_concept_set("Test Set", [201826, 12345])

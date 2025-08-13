@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ohdsi-webapi": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI",
+        "ghcr.io/clsweeting/ohdsi-webapi-mcp:latest"
+      ]
+    }
+  }
+}
