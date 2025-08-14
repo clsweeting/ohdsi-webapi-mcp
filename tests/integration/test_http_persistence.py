@@ -133,7 +133,7 @@ class TestPersistenceRouter:
         assert save_response.status_code == 200
         saved_data = save_response.json()["data"]
 
-        # Verify the saved data response structure 
+        # Verify the saved data response structure
         # (Persistence router returns structured data, not MCP TextContent)
         assert isinstance(saved_data, dict)
         assert "key" in saved_data
