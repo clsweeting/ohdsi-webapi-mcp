@@ -130,12 +130,6 @@ The tests require the following environment variables:
 ```bash
 # Required for connecting to OHDSI WebAPI
 WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI"
-WEBAPI_SOURCE_KEY="EUNOMIA"
-
-# Optional for authentication
-WEBAPI_USERNAME="your_username"
-WEBAPI_PASSWORD="your_password"
-```
 
 ## Test Data and Fixtures
 
