@@ -25,7 +25,6 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="OHDSI WebAPI MCP Server",
         description="HTTP API for OHDSI WebAPI Model Context Protocol tools",
-        version="0.1.0",
     )
 
     # Add CORS middleware
