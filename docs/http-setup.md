@@ -47,7 +47,11 @@ WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI ohdsi-webapi-mcp-http
 
 ### With Cohort Features
 ```bash
-# Add source key for cohort operations
+# Basic usage (works for most operations)
+WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI \
+ohdsi-webapi-mcp-http
+
+# Add source key only if you need cohort size estimation
 WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI \
 WEBAPI_SOURCE_KEY=EUNOMIA \
 ohdsi-webapi-mcp-http
@@ -61,7 +65,7 @@ MCP_PORT=8080 \
 MCP_HOST=0.0.0.0 \
 ohdsi-webapi-mcp-http
 
-# Full configuration with cohort support
+# Full configuration with cohort size estimation support
 WEBAPI_BASE_URL=https://your-webapi.org/WebAPI \
 MCP_PORT=8080 \
 MCP_HOST=0.0.0.0 \
@@ -116,7 +120,7 @@ docker run -p 8000:8000 --rm \
   -e WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI" \
   ghcr.io/clsweeting/ohdsi-webapi-mcp:latest http
 
-# With cohort features
+# With cohort size estimation features
 docker run -p 8000:8000 --rm \
   -e WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI" \
   -e WEBAPI_SOURCE_KEY="EUNOMIA" \
@@ -136,7 +140,8 @@ services:
       - "8000:8000"
     environment:
       - WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI
-      - WEBAPI_SOURCE_KEY=EUNOMIA
+      # Uncomment if you need cohort size estimation:
+      # - WEBAPI_SOURCE_KEY=EUNOMIA
       - MCP_PORT=8000
       - MCP_HOST=0.0.0.0
     command: ["http"]

@@ -33,7 +33,7 @@ case "${1:-help}" in
         echo "🚀 Running MCP server in Docker..."
         docker run -i --rm \
             -e WEBAPI_BASE_URL="${WEBAPI_BASE_URL:-https://atlas-demo.ohdsi.org/WebAPI}" \
-            -e WEBAPI_SOURCE_KEY="${WEBAPI_SOURCE_KEY:-EUNOMIA}" \
+            ${WEBAPI_SOURCE_KEY:+-e WEBAPI_SOURCE_KEY="$WEBAPI_SOURCE_KEY"} \
             "$IMAGE_NAME:$TAG"
         ;;
     
@@ -70,7 +70,7 @@ case "${1:-help}" in
         echo "  help      Show this help message"
         echo ""
         echo "Environment variables:"
-        echo "  WEBAPI_BASE_URL   - OHDSI WebAPI base URL"
-        echo "  WEBAPI_SOURCE_KEY - CDM source key"
+        echo "  WEBAPI_BASE_URL   - OHDSI WebAPI base URL (required)"
+        echo "  WEBAPI_SOURCE_KEY - CDM source key (optional, only for cohort size estimation)"
         ;;
 esac

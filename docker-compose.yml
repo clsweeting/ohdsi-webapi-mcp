@@ -5,7 +5,8 @@ services:
     build: .
     environment:
       - WEBAPI_BASE_URL=${WEBAPI_BASE_URL:-https://atlas-demo.ohdsi.org/WebAPI}
-      - WEBAPI_SOURCE_KEY=${WEBAPI_SOURCE_KEY:-EUNOMIA}
+      # Uncomment if you need cohort size estimation:
+      # - WEBAPI_SOURCE_KEY=${WEBAPI_SOURCE_KEY:-EUNOMIA}
     stdin_open: true
     tty: true
     volumes:
@@ -19,6 +20,7 @@ services:
     build: .
     environment:
       - WEBAPI_BASE_URL=${WEBAPI_BASE_URL}
-      - WEBAPI_SOURCE_KEY=${WEBAPI_SOURCE_KEY}
+      # Uncomment if you need cohort size estimation:
+      # - WEBAPI_SOURCE_KEY=${WEBAPI_SOURCE_KEY}
     stdin_open: true
     tty: true

@@ -57,7 +57,7 @@ Add this to your Claude Desktop MCP configuration file:
 }
 ```
 
-**Note**: `WEBAPI_SOURCE_KEY` is optional and only needed for cohort operations. Most concept searches work without it. For the demo instance, you can add `"WEBAPI_SOURCE_KEY": "EUNOMIA"` if you want to test cohort features.
+**Note**: `WEBAPI_SOURCE_KEY` is optional and only needed for cohort size estimation. Most operations (concept searches, vocabulary browsing, etc.) work without it. For the demo instance, you can add `"WEBAPI_SOURCE_KEY": "EUNOMIA"` if you want to test cohort size estimation.
 
 **Configuration file locations:**
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -80,7 +80,7 @@ Add this to your VS Code settings:
 }
 ```
 
-**Note**: Add `"WEBAPI_SOURCE_KEY": "EUNOMIA"` only if you need cohort operations.
+**Note**: Add `"WEBAPI_SOURCE_KEY": "EUNOMIA"` only if you need cohort size estimation.
 
 ### Generic MCP Client
 For any MCP client that supports process spawning:
@@ -92,8 +92,8 @@ ohdsi-webapi-mcp
 # Required environment variable
 WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI
 
-# Optional (only needed for cohort operations)
-WEBAPI_SOURCE_KEY=EUNOMIA
+# Optional - only add if you need cohort size estimation:
+# WEBAPI_SOURCE_KEY=EUNOMIA
 ```
 
 ## Docker Setup
@@ -110,9 +110,10 @@ docker run -i --rm \
 ```bash
 docker run -i --rm \
   -e WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI" \
-  -e WEBAPI_SOURCE_KEY="EUNOMIA" \
   ghcr.io/clsweeting/ohdsi-webapi-mcp:latest stdio
 ```
+
+**Note**: Add `-e WEBAPI_SOURCE_KEY="EUNOMIA"` only if you need cohort size estimation.
 
 ### Claude Desktop with Docker
 ```json
@@ -140,7 +141,6 @@ docker run -i --rm \
       "args": [
         "run", "-i", "--rm",
         "-e", "WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI",
-        "-e", "WEBAPI_SOURCE_KEY=EUNOMIA",
         "ghcr.io/clsweeting/ohdsi-webapi-mcp:latest",
         "stdio"
       ]
@@ -148,6 +148,8 @@ docker run -i --rm \
   }
 }
 ```
+
+**Note**: Add `"-e", "WEBAPI_SOURCE_KEY=EUNOMIA",` to the args array if you need cohort size estimation.
 
 ### Building Local Docker Image
 ```bash

@@ -212,15 +212,13 @@ async def get_default_source() -> list[types.TextContent]:
             else:
                 # Show the first available source as default
                 default_source = sources[0]
-                result += "No WEBAPI_SOURCE_KEY configured. First available source:\n"
+                result += "Available sources (first source shown):\n"
                 result += f"  - Name: {default_source.source_name}\n"
                 result += f"  - Key: {default_source.source_key}\n"
                 if hasattr(default_source, "source_dialect"):
                     result += f"  - Dialect: {default_source.source_dialect}\n"
                 if hasattr(default_source, "cdm_version"):
                     result += f"  - CDM Version: {default_source.cdm_version}\n"
-
-                result += "\nTo set a default source, configure WEBAPI_SOURCE_KEY environment variable.\n"
 
                 if len(sources) > 1:
                     result += f"\nOther available sources ({len(sources) - 1}):\n"
