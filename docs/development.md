@@ -17,11 +17,14 @@ cd ohdsi-webapi-mcp
 poetry install
 
 # Run tests
-poetry run pytest
+make test 
 
 # Format code
-poetry run black src tests
-poetry run isort src tests
+make lint
+make format 
+
+# Fix code 
+make fix 
 ```
 
 ### Configuration

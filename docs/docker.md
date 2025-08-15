@@ -224,3 +224,18 @@ docker run -i --rm \
 - **User**: `mcpuser` (non-root)
 - **Exposed Ports**: None (stdin/stdout communication)
 - **Health Check**: Built-in `--help` test
+
+
+
+### Docker Debugging
+```bash
+# Check container logs
+docker run -p 8000:8000 \
+  -e WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI \
+  -e LOG_LEVEL=DEBUG \
+  ghcr.io/clsweeting/ohdsi-webapi-mcp:latest http
+
+# Or with docker-compose
+docker-compose logs -f ohdsi-mcp
+```
+

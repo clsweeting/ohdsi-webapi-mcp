@@ -35,26 +35,7 @@ cd ohdsi-webapi-mcp
 pip install -e .
 ```
 
-## Configuration
 
-Configuration is via environment variables
-
-- **`WEBAPI_BASE_URL`** (required): Base URL of your OHDSI WebAPI instance
-  - Example: `https://atlas-demo.ohdsi.org/WebAPI`
-- **`WEBAPI_SOURCE_KEY`** (optional): CDM source key for cohort operations
-  - **Only needed for**: Creating cohorts, saving cohort definitions, generating cohorts
-  - **Not needed for**: Concept searches, vocabulary browsing, concept details
-  - **Demo value**: `EUNOMIA` (works with atlas-demo.ohdsi.org)
-  - **Other examples**: `OPTUM_DOD`, `CCAE`, `MDCR` (depends on your WebAPI instance)
-  - **How to find yours**: Visit your WebAPI at `/source/sources` or ask your OHDSI admin
-- **`MCP_PORT`** (optional): Port for HTTP server (default: 8000)
-- **`MCP_HOST`** (optional): Host for HTTP server (default: 0.0.0.0)
-- **`LOG_LEVEL`** (optional): Logging level (default: INFO)
-  - Options: `DEBUG`, `INFO`, `WARNING`, `ERROR`
-
-At it's simplest, you only really need `WEBAPI_BASE_URL` - pointing to your OHDSI WebAPI. 
-
-For more information about WEBAPI_SOURCE_KEY, see [this document](./source_key.md). 
 
 
 ## Starting the HTTP Server
@@ -127,9 +108,6 @@ docker run -p 8000:8000 --rm \
 
 # Server available at http://localhost:8000
 ```
-
--------------
-
 
 -------------
 
@@ -227,17 +205,5 @@ The server includes CORS headers for development. For production, configure your
 LOG_LEVEL=DEBUG \
 WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI \
 ohdsi-webapi-mcp-http
-```
-
-### Docker Debugging
-```bash
-# Check container logs
-docker run -p 8000:8000 \
-  -e WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI \
-  -e LOG_LEVEL=DEBUG \
-  ghcr.io/clsweeting/ohdsi-webapi-mcp:latest http
-
-# Or with docker-compose
-docker-compose logs -f ohdsi-mcp
 ```
 
