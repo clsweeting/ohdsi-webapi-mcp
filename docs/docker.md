@@ -2,6 +2,33 @@
 
 This document explains how to use the OHDSI WebAPI MCP Server with Docker.
 
+
+### Docker Compose
+
+A [docker-compose.yml](../docker-compose.yml) is provided. 
+
+```bash
+# Start with docker-compose
+docker-compose up -d
+
+# Stop
+docker-compose down
+```
+
+### Building Local Docker Image
+```bash
+# Clone and build
+git clone https://github.com/clsweeting/ohdsi-webapi-mcp.git
+cd ohdsi-webapi-mcp
+docker build -t ohdsi-webapi-mcp-local .
+
+# Run HTTP mode
+docker run -p 8000:8000 --rm \
+  -e WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI" \
+  ohdsi-webapi-mcp-local http
+```
+
+
 ## Quick Start
 
 ### 1. Pull and Run (Simplest)

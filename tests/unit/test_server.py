@@ -161,7 +161,7 @@ class TestMCPTools:
             mock_saved_cohort.description = "Test description"
             mock_saved_cohort.created_date = "2024-01-01"
 
-            mock_client.cohort_definitions.create.return_value = mock_saved_cohort
+            mock_client.cohorts.create.return_value = mock_saved_cohort
             mock_client.close = AsyncMock()  # Mock async close method
 
             result = await save_cohort_definition("Test Cohort", sample_cohort_definition)

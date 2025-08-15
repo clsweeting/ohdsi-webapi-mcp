@@ -29,8 +29,7 @@ poetry run isort src tests
 Create a `.env` file or set environment variables:
 
 ```bash
-WEBAPI_BASE_URL=https://your-webapi-instance.org/WebAPI
-WEBAPI_SOURCE_ID=1  # Your CDM source ID
+WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI
 ```
 
 ### Running the Server

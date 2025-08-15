@@ -7,6 +7,7 @@ from typing import Any
 
 import mcp.types as types
 from ohdsi_webapi import WebApiClient
+from ohdsi_webapi.models.cohort import CohortDefinition
 
 
 async def save_cohort_definition(name: str, cohort_definition: dict[str, Any], description: str | None = None) -> list[types.TextContent]:
@@ -33,16 +34,16 @@ async def save_cohort_definition(name: str, cohort_definition: dict[str, Any], d
     def _sync_save_cohort():
         client = WebApiClient(webapi_base_url)
         try:
-            # Prepare cohort definition for saving
-            cohort_data = {
-                "name": name,
-                "description": description or f"Cohort created via MCP: {name}",
-                "expressionType": "SIMPLE_EXPRESSION",
-                "expression": cohort_definition,
-            }
+            # Create a proper CohortDefinition model instance
+            cohort_def = CohortDefinition(
+                name=name,
+                description=description or f"Cohort created via MCP: {name}",
+                expressionType="SIMPLE_EXPRESSION",
+                expression=cohort_definition,
+            )
 
             # Save to WebAPI
-            saved_cohort = client.cohorts.create(cohort_data)
+            saved_cohort = client.cohorts.create(cohort_def)
 
             result = f"""✅ Cohort Definition Saved Successfully!
 
@@ -351,15 +352,15 @@ async def clone_cohort(
                 if key in cloned_definition:
                     cloned_definition[key] = value
 
-        # Create new cohort
-        cohort_data = {
-            "name": new_name,
-            "description": new_description or f"Clone of {source_cohort.name}",
-            "expressionType": "SIMPLE_EXPRESSION",
-            "expression": cloned_definition,
-        }
+        # Create new cohort with proper model
+        cohort_def = CohortDefinition(
+            name=new_name,
+            description=new_description or f"Clone of {source_cohort.name}",
+            expressionType="SIMPLE_EXPRESSION",
+            expression=cloned_definition,
+        )
 
-        cloned_cohort = await client.cohorts.create(cohort_data)
+        cloned_cohort = await client.cohorts.create(cohort_def)
 
         result = f"""✅ Cohort Cloned Successfully!
 

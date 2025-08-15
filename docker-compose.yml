@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  ohdsi-webapi-mcp:
+  ohdsi-webapi-mcp-stdio:
     build: .
     environment:
       - WEBAPI_BASE_URL=${WEBAPI_BASE_URL:-https://atlas-demo.ohdsi.org/WebAPI}
@@ -15,12 +13,34 @@ services:
     profiles:
       - dev
 
-  # Production service (without volume mounts)
-  ohdsi-webapi-mcp-prod:
+  ohdsi-webapi-mcp-http:
     build: .
+    command: ["http"]  
     environment:
-      - WEBAPI_BASE_URL=${WEBAPI_BASE_URL}
-      # Uncomment if you need cohort size estimation:
-      # - WEBAPI_SOURCE_KEY=${WEBAPI_SOURCE_KEY}
-    stdin_open: true
-    tty: true
+      - WEBAPI_BASE_URL=${WEBAPI_BASE_URL:-https://atlas-demo.ohdsi.org/WebAPI}
+      - MCP_PORT=8000
+      - MCP_HOST=0.0.0.0
+    ports:
+      - "8000:8000" 
+    profiles:
+      - http
+      - https 
+
+# HTTPS service (Caddy reverse proxy)
+  ohdsi-webapi-mcp-https:
+    image: caddy:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - ohdsi-webapi-mcp-http
+    profiles:
+      - https   
+
+volumes:
+  caddy_data:
+  caddy_config:

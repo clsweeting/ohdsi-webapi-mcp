@@ -36,9 +36,6 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Initialize MCP integration
-    _mcp = FastApiMCP(app)  # Keep reference to prevent garbage collection
-
     # Include routers
     app.include_router(vocabulary_router)
     app.include_router(concept_sets_router)
@@ -60,6 +57,13 @@ def create_app() -> FastAPI:
 # Create app instance
 app = create_app()
 
+mcp = FastApiMCP(app)
+
+# Mount the MCP server directly to your FastAPI app
+# https://github.com/tadata-org/fastapi_mcp
+# mount_http() for HTTP transport (recommended) or mount_sse() for SSE transport instead.
+
+mcp.mount_http()
 
 if __name__ == "__main__":
     import uvicorn

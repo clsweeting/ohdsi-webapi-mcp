@@ -1,11 +1,14 @@
 # OHDSI WebAPI MCP Server - HTTP Mode Setup
 
-The **HTTP mode** provides a web-based API with Server-Sent Events (SSE) for MCP communication. This mode is ideal for:
+The standard remote transport for MCP servers is "Streamable HTTP," which uses HTTP POST for client-to-server messages and can optionally use Server-Sent Events (SSE) for server-to-client streaming.
+
+This mode is ideal for:
 
 - Web applications and remote access
 - API testing and development
 - Modern MCP clients that support HTTP transport
 - Integration with web frameworks
+
 
 ## Installation
 
@@ -31,6 +34,28 @@ git clone https://github.com/clsweeting/ohdsi-webapi-mcp.git
 cd ohdsi-webapi-mcp
 pip install -e .
 ```
+
+## Configuration
+
+Configuration is via environment variables
+
+- **`WEBAPI_BASE_URL`** (required): Base URL of your OHDSI WebAPI instance
+  - Example: `https://atlas-demo.ohdsi.org/WebAPI`
+- **`WEBAPI_SOURCE_KEY`** (optional): CDM source key for cohort operations
+  - **Only needed for**: Creating cohorts, saving cohort definitions, generating cohorts
+  - **Not needed for**: Concept searches, vocabulary browsing, concept details
+  - **Demo value**: `EUNOMIA` (works with atlas-demo.ohdsi.org)
+  - **Other examples**: `OPTUM_DOD`, `CCAE`, `MDCR` (depends on your WebAPI instance)
+  - **How to find yours**: Visit your WebAPI at `/source/sources` or ask your OHDSI admin
+- **`MCP_PORT`** (optional): Port for HTTP server (default: 8000)
+- **`MCP_HOST`** (optional): Host for HTTP server (default: 0.0.0.0)
+- **`LOG_LEVEL`** (optional): Logging level (default: INFO)
+  - Options: `DEBUG`, `INFO`, `WARNING`, `ERROR`
+
+At it's simplest, you only really need `WEBAPI_BASE_URL` - pointing to your OHDSI WebAPI. 
+
+For more information about WEBAPI_SOURCE_KEY, see [this document](./source_key.md). 
+
 
 ## Starting the HTTP Server
 
@@ -83,33 +108,7 @@ nohup ohdsi-webapi-mcp-http > server.log 2>&1 &
 curl http://localhost:8000/health
 ```
 
-## MCP Client Configuration
 
-### Claude Desktop (HTTP mode)
-Add this to your Claude Desktop MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "ohdsi-webapi": {
-      "url": "http://localhost:8000/mcp"
-    }
-  }
-}
-```
-
-**Note**: Make sure the HTTP server is running before starting Claude Desktop.
-
-### Modern MCP Clients
-For MCP clients that support HTTP transport:
-
-```javascript
-// Connect to MCP endpoint
-const mcpEndpoint = "http://localhost:8000/mcp";
-
-// Or access as REST API
-const apiBase = "http://localhost:8000";
-```
 
 ## Alternative: Docker Setup
 
@@ -129,58 +128,28 @@ docker run -p 8000:8000 --rm \
 # Server available at http://localhost:8000
 ```
 
-### Docker Compose
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  ohdsi-mcp:
-    image: ghcr.io/clsweeting/ohdsi-webapi-mcp:latest
-    ports:
-      - "8000:8000"
-    environment:
-      - WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI
-      # Uncomment if you need cohort size estimation:
-      # - WEBAPI_SOURCE_KEY=EUNOMIA
-      - MCP_PORT=8000
-      - MCP_HOST=0.0.0.0
-    command: ["http"]
-    restart: unless-stopped
-```
+-------------
 
-```bash
-# Start with docker-compose
-docker-compose up -d
 
-# Stop
-docker-compose down
-```
+-------------
 
-### Building Local Docker Image
-```bash
-# Clone and build
-git clone https://github.com/clsweeting/ohdsi-webapi-mcp.git
-cd ohdsi-webapi-mcp
-docker build -t ohdsi-webapi-mcp-local .
-
-# Run HTTP mode
-docker run -p 8000:8000 --rm \
-  -e WEBAPI_BASE_URL="https://atlas-demo.ohdsi.org/WebAPI" \
-  ohdsi-webapi-mcp-local http
-```
 
 ## API Access & Testing
 
 ### REST API Endpoints
 
-The HTTP mode exposes both MCP and REST endpoints:
+The HTTP mode exposes both MCP and REST endpoints. You can explore the REST API endpoints at `http://localhost:8000/docs` 
 
-#### Health Check
+### Testing with curl 
+
+Health check endpoint: 
+
 ```bash
 curl http://localhost:8000/health
 ```
 
-#### Concept Search
+Concept search: 
+
 ```bash
 curl -X POST "http://localhost:8000/concepts/search" \
   -H "Content-Type: application/json" \
@@ -191,7 +160,8 @@ curl -X POST "http://localhost:8000/concepts/search" \
   }'
 ```
 
-#### Get Concept Details
+Get concept details: 
+
 ```bash
 curl -X POST "http://localhost:8000/concepts/details" \
   -H "Content-Type: application/json" \
@@ -200,18 +170,11 @@ curl -X POST "http://localhost:8000/concepts/details" \
   }'
 ```
 
-#### List Domains
+List domains: 
+
 ```bash
 curl http://localhost:8000/concepts/domains
 ```
-
-### Interactive API Documentation
-
-Visit `http://localhost:8000/docs` in your browser for:
-- Complete API documentation
-- Interactive endpoint testing
-- Request/response examples
-- Schema definitions
 
 ### MCP Endpoint
 
@@ -221,178 +184,9 @@ The MCP protocol endpoint is available at `/mcp`:
 curl http://localhost:8000/mcp
 ```
 
-## Environment Variables
+The best way to interact with the MCP server is via the MCP Inspector as described in the ['testing' section here](./development.md). 
 
-- **`WEBAPI_BASE_URL`** (required): Base URL of your OHDSI WebAPI instance
-  - Example: `https://atlas-demo.ohdsi.org/WebAPI`
-- **`WEBAPI_SOURCE_KEY`** (optional): CDM source key for cohort operations
-  - **Only needed for**: Creating cohorts, saving cohort definitions, generating cohorts
-  - **Not needed for**: Concept searches, vocabulary browsing, concept details
-  - **Demo value**: `EUNOMIA` (works with atlas-demo.ohdsi.org)
-  - **Other examples**: `OPTUM_DOD`, `CCAE`, `MDCR` (depends on your WebAPI instance)
-  - **How to find yours**: Visit your WebAPI at `/source/sources` or ask your OHDSI admin
-- **`MCP_PORT`** (optional): Port for HTTP server (default: 8000)
-- **`MCP_HOST`** (optional): Host for HTTP server (default: 0.0.0.0)
-- **`LOG_LEVEL`** (optional): Logging level (default: INFO)
-  - Options: `DEBUG`, `INFO`, `WARNING`, `ERROR`
-
-### What is WEBAPI_SOURCE_KEY?
-
-The **source key** identifies which CDM database to use for cohort operations. Different OHDSI instances have different available data sources:
-
-- **atlas-demo.ohdsi.org**: Has `EUNOMIA` (synthetic data)
-- **Your institution**: Might have `CCAE`, `OPTUM_DOD`, `MDCR`, etc.
-
-**You can start without it!** Most features work fine without a source key:
-
-✅ **Works without source key:**
-- Search for medical concepts
-- Get concept details and hierarchy
-- Browse vocabularies and domains
-- Explore the API documentation
-
-❗ **Requires source key:**
-- Create and save cohort definitions
-- Generate cohorts on data
-- Estimate cohort sizes
-
-To find available sources for your WebAPI, visit: `https://your-webapi-url/WebAPI/source/sources`
-
-## Web Integration Examples
-
-### JavaScript/TypeScript
-```javascript
-// Search for concepts
-async function searchConcepts(query) {
-  const response = await fetch('http://localhost:8000/concepts/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: query,
-      domain: 'Condition',
-      limit: 10
-    })
-  });
-  
-  const result = await response.json();
-  return result.data;
-}
-
-// Get concept details
-async function getConceptDetails(conceptId) {
-  const response = await fetch('http://localhost:8000/concepts/details', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ concept_id: conceptId })
-  });
-  
-  return response.json();
-}
-```
-
-### Python
-```python
-import requests
-
-# Search concepts
-def search_concepts(query, domain=None, limit=10):
-    response = requests.post(
-        'http://localhost:8000/concepts/search',
-        json={
-            'query': query,
-            'domain': domain,
-            'limit': limit
-        }
-    )
-    return response.json()
-
-# Health check
-def check_health():
-    response = requests.get('http://localhost:8000/health')
-    return response.json()
-```
-
-## Testing
-
-### Quick API Test
-```bash
-# Start the server (no source key needed for basic testing)
-WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI ohdsi-webapi-mcp-http
-
-# In another terminal, test endpoints
-curl http://localhost:8000/health
-curl -X POST "http://localhost:8000/concepts/search" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "diabetes", "limit": 5}'
-
-# Browse interactive docs
-open http://localhost:8000/docs
-```
-
-### Integration Tests
-```bash
-# Clone the repo for full test suite
-git clone https://github.com/clsweeting/ohdsi-webapi-mcp.git
-cd ohdsi-webapi-mcp
-
-# Install dev dependencies
-pip install -e ".[dev]"
-
-# Run integration tests
-WEBAPI_BASE_URL=https://atlas-demo.ohdsi.org/WebAPI \
-poetry run pytest tests/integration/ -v
-```
-
-## Production Deployment
-
-### Reverse Proxy (nginx)
-```nginx
-# /etc/nginx/sites-available/ohdsi-mcp
-server {
-    listen 80;
-    server_name your-domain.com;
-    
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        
-        # For SSE support
-        proxy_buffering off;
-        proxy_cache off;
-    }
-}
-```
-
-### Systemd Service
-```ini
-# /etc/systemd/system/ohdsi-mcp.service
-[Unit]
-Description=OHDSI WebAPI MCP Server
-After=network.target
-
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/opt/ohdsi-mcp
-Environment=WEBAPI_BASE_URL=https://your-webapi.org/WebAPI
-Environment=WEBAPI_SOURCE_KEY=YOUR_CDM_SOURCE
-Environment=MCP_PORT=8000
-Environment=MCP_HOST=127.0.0.1
-ExecStart=/usr/local/bin/ohdsi-webapi-mcp-http
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-# Enable and start service
-sudo systemctl enable ohdsi-mcp
-sudo systemctl start ohdsi-mcp
-sudo systemctl status ohdsi-mcp
-```
+-------------
 
 ## Troubleshooting
 
@@ -447,13 +241,3 @@ docker run -p 8000:8000 \
 docker-compose logs -f ohdsi-mcp
 ```
 
-## Next Steps
-
-Once you have HTTP mode working:
-
-1. **Test the API**: Visit `http://localhost:8000/docs` to explore all endpoints
-2. **Try concept searches**: Use the interactive docs or curl to test searches
-3. **Integrate with your app**: Use the REST API from your web application
-4. **Set up MCP client**: Configure Claude Desktop or other MCP clients to use the HTTP endpoint
-
-For stdio mode setup, see [stdio-setup.md](stdio-setup.md).

@@ -85,7 +85,7 @@ size_synpuf = client.post("/cohorts/estimate-size",
                          json={"cohort_definition": {...}, "source_key": "SYNPUF1K"})
 ```
 
-### Operations That Don't Need Sources
+### Operations that don't need Sources
 ```python
 # These work regardless of WEBAPI_SOURCE_KEY configuration
 concepts = client.post("/vocabulary/search", json={"query": "diabetes"})
@@ -111,15 +111,4 @@ for source in sources:
 2. **Specify sources per-request** - More explicit and flexible
 3. **Use environment variable only for single-source setups** - When you always use the same source
 4. **List available sources first** - Use `/sources` endpoint to discover what's available
-
-## Common Misconceptions
-
-❌ **"WEBAPI_SOURCE_KEY is required to start the server"**  
-✅ Server starts and most operations work without it
-
-❌ **"All operations need a source"**  
-✅ Only cohort size estimation truly requires a source
-
-❌ **"Must be set in environment"**  
-✅ Can be provided per-request, which is often more flexible
 
