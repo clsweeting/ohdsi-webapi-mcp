@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ohdsi-webapi-mcp"
-version = "0.1.0"
+version = "0.2.1"
 description = "Model Context Protocol (MCP) server for OHDSI WebAPI cohort building"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"

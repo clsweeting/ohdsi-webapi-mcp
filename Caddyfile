@@ -1,0 +1,4 @@
+localhost {
+    reverse_proxy ohdsi-webapi-mcp-http:8000
+    tls internal
+}

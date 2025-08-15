@@ -22,7 +22,7 @@ class ConceptSearchRequest(BaseModel):
     concept_class: str | None = Field(None, description="Concept class filter")
     standard_only: bool = Field(True, description="Return only standard concepts")
     include_invalid: bool = Field(False, description="Include invalid/deprecated concepts")
-    limit: int = Field(20, description="Maximum number of results")
+    page_size: int = Field(20, description="Maximum number of results")
 
 
 class ConceptDetailsRequest(BaseModel):
@@ -33,7 +33,7 @@ class ConceptHierarchyRequest(BaseModel):
     concept_id: int = Field(..., description="Starting concept ID")
     direction: str = Field("descendants", description="Direction to browse", pattern="^(descendants|ancestors|both)$")
     max_levels: int = Field(2, description="Maximum hierarchy levels")
-    limit: int = Field(20, description="Maximum concepts per level")
+    page_size: int = Field(20, description="Maximum concepts per level")
 
 
 # Response models
@@ -47,7 +47,10 @@ class ConceptSearchResponse(BaseModel):
 async def search_concepts_endpoint(request: ConceptSearchRequest) -> ConceptSearchResponse:
     """Search for medical concepts in OMOP vocabularies."""
     try:
-        result = await search_concepts(**request.model_dump())
+        # Convert page_size back to limit for the tool function
+        request_dict = request.model_dump()
+        request_dict["limit"] = request_dict.pop("page_size")
+        result = await search_concepts(**request_dict)
         return {"status": "success", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -67,7 +70,10 @@ async def get_concept_details_endpoint(request: ConceptDetailsRequest):
 async def browse_concept_hierarchy_endpoint(request: ConceptHierarchyRequest):
     """Browse concept hierarchy (ancestors/descendants)."""
     try:
-        result = await browse_concept_hierarchy(**request.model_dump())
+        # Convert page_size back to limit for the tool function
+        request_dict = request.model_dump()
+        request_dict["limit"] = request_dict.pop("page_size")
+        result = await browse_concept_hierarchy(**request_dict)
         return {"status": "success", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

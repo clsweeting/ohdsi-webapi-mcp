@@ -18,7 +18,15 @@ def client():
 def setup_webapi_env():
     """Set up environment variables for testing."""
     os.environ["WEBAPI_BASE_URL"] = "https://atlas-demo.ohdsi.org/WebAPI"
+
+
+@pytest.fixture
+def setup_cohort_env():
+    """Set up environment variables for cohort testing."""
     os.environ["WEBAPI_SOURCE_KEY"] = "EUNOMIA"
+    yield
+    # Clean up after test
+    os.environ.pop("WEBAPI_SOURCE_KEY", None)
 
 
 class TestHealthEndpoint:
@@ -217,6 +225,11 @@ class TestConceptSetEndpoints:
 
 class TestCohortBuildingEndpoints:
     """Test cohort building endpoints."""
+
+    @pytest.fixture(autouse=True)
+    def setup_cohort_tests(self, setup_cohort_env):
+        """Ensure cohort environment is set up for all tests in this class."""
+        pass
 
     def test_define_primary_criteria(self, client):
         """Test defining primary criteria."""

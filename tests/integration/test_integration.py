@@ -101,37 +101,6 @@ class TestMCPServerIntegration:
             process.wait(timeout=5)
             pytest.fail(f"Server failed to start: {e}")
 
-    # def test_server_missing_env_vars(self):
-    #     """Test server fails gracefully with missing environment variables."""
-    #     env = os.environ.copy()
-    #     # Remove required env vars
-    #     env.pop("WEBAPI_BASE_URL", None)
-    #     env.pop("WEBAPI_SOURCE_KEY", None)
-
-    #     process = subprocess.Popen(
-    #         ["poetry", "run", "ohdsi-webapi-mcp"],
-    #         stdin=subprocess.PIPE,
-    #         stdout=subprocess.PIPE,
-    #         stderr=subprocess.PIPE,
-    #         env=env,
-    #         cwd=Path(__file__).parent.parent,
-    #     )
-
-    #     try:
-    #         stdout, stderr = process.communicate(timeout=5)
-
-    #         # Should exit with error
-    #         assert process.returncode != 0
-
-    #         # Should have helpful error message
-    #         error_output = stderr.decode()
-    #         assert "WEBAPI_BASE_URL" in error_output or "required" in error_output.lower()
-
-    #     except subprocess.TimeoutExpired:
-    #         process.terminate()
-    #         process.wait()
-    #         pytest.fail("Server should have failed quickly with missing env vars")
-
 
 class TestMCPServerOutputFormat:
     """Test that MCP server outputs are correctly formatted for LLMs."""

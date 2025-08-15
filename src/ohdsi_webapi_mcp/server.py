@@ -36,7 +36,6 @@ class McpServerConfig:
     """Configuration for the MCP server."""
 
     webapi_base_url: str
-    webapi_source_key: str | None = None
     log_level: str = "INFO"
 
 
@@ -57,13 +56,8 @@ def load_config() -> McpServerConfig:
     if not webapi_base_url:
         raise ValueError("WEBAPI_BASE_URL environment variable is required")
 
-    webapi_source_key = os.getenv("WEBAPI_SOURCE_KEY")
-    # Note: webapi_source_key is optional - only needed for cohort size estimation
-    # Individual tools will validate and prompt for it when needed
-
     return McpServerConfig(
         webapi_base_url=webapi_base_url,
-        webapi_source_key=webapi_source_key,
         log_level=os.getenv("LOG_LEVEL", "INFO"),
     )
 

@@ -345,4 +345,4 @@ Cohort Definition: {len(str(cohort_definition))} characters
     except Exception as e:
         return [types.TextContent(type="text", text=f"Error estimating cohort size: {str(e)}")]
     finally:
-        await client.close()
+        client.close()

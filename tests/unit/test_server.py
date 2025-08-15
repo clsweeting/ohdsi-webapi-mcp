@@ -10,11 +10,9 @@ from ohdsi_webapi_mcp.server import load_config
 def test_load_config_basic(monkeypatch):
     """Test basic config loading."""
     monkeypatch.setenv("WEBAPI_BASE_URL", "http://localhost:8080/WebAPI")
-    monkeypatch.setenv("WEBAPI_SOURCE_KEY", "SYNPUF1K")
 
     config = load_config()
     assert config.webapi_base_url == "http://localhost:8080/WebAPI"
-    assert config.webapi_source_key == "SYNPUF1K"
     assert config.log_level == "INFO"
 
 
@@ -29,12 +27,10 @@ def test_load_config_missing_required_env(monkeypatch):
 def test_load_config_with_all_env(monkeypatch):
     """Test config loading with all environment variables."""
     monkeypatch.setenv("WEBAPI_BASE_URL", "https://atlas.example.com/WebAPI")
-    monkeypatch.setenv("WEBAPI_SOURCE_KEY", "DEMO")
     monkeypatch.setenv("LOG_LEVEL", "DEBUG")
 
     config = load_config()
     assert config.webapi_base_url == "https://atlas.example.com/WebAPI"
-    assert config.webapi_source_key == "DEMO"
     assert config.log_level == "DEBUG"
 
 
@@ -165,7 +161,7 @@ class TestMCPTools:
             mock_saved_cohort.description = "Test description"
             mock_saved_cohort.created_date = "2024-01-01"
 
-            mock_client.cohort_definitions.create.return_value = mock_saved_cohort
+            mock_client.cohorts.create.return_value = mock_saved_cohort
             mock_client.close = AsyncMock()  # Mock async close method
 
             result = await save_cohort_definition("Test Cohort", sample_cohort_definition)
