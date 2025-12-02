@@ -27,7 +27,7 @@ packages = [{include = "ohdsi_webapi_mcp", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-mcp = "^1.0.0"
+mcp = "^1.23.0"
 ohdsi-webapi-client = "^0.3.1"
 ohdsi-cohort-schemas = "^0.1.0"
 pydantic = "^2.0.0"
